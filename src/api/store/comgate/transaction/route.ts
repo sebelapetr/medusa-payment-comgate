@@ -43,6 +43,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             } else {
                 res.status(200).send({
                     redirect: transaction.redirect,
+                    transId: transaction.transId,
                 });
                 return;
             }

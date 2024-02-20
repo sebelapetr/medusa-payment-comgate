@@ -93,14 +93,12 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
     context: PaymentProcessorContext
   ): Promise<PaymentProcessorError | PaymentProcessorSessionResponse> {
     const session_data = {
-      transId: "test",
     };
     try {
       return {
         session_data: session_data as any,
         update_requests: {
           customer_metadata: {
-            comgateClientid: "asdf",
           },
         },
       };
@@ -124,48 +122,8 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
         data: PaymentProcessorSessionResponse["session_data"];
       }
   > {
-    const { cartId } = paymentSessionData;
-    const cart = await this.cartService.retrieveWithTotals(cartId);
-    if (this.options_.test) {
-      console.info("InitiatePayment", JSON.stringify(context, null, 2));
-    }
-
-    const options: CreateRequest = {
-      country: cart.billing_address
-        ? (cart.billing_address.country_code?.toUpperCase() as CreateCountry)
-        : (cart.shipping_address?.country_code?.toUpperCase() as CreateCountry),
-      price: cart.total,
-      curr: cart.region.currency_code.toUpperCase() as CreateCurr,
-      label: "Order from eshop",
-      refId: cart.id.replace("cart_", ""),
-      method: "ALL",
-      email: cart.email,
-      lang: "cs", // todo
-      prepareOnly: false,
-      preauth: false,
-      initRecurring: false,
-      verification: false,
-    };
-
-    try {
-      const session_data = await this.comgateClient.create(options);
-      if (session_data.code !== 0) {
-        const error: PaymentProcessorError = {
-          error: session_data.message,
-          code: String(session_data.code),
-        };
-        return error;
-      }
-      return {
-        data: session_data,
-        status: PaymentSessionStatus.PENDING,
-      };
-    } catch (e) {
-      return this.buildError(
-        "An error occurred in InitiatePayment during the creation of the razorpay payment intent",
-        e
-      );
-    }
+    const status = await this.getPaymentStatus(paymentSessionData);
+    return { data: paymentSessionData, status };
   }
 
   async cancelPayment(
@@ -211,7 +169,7 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   > {
     const error: PaymentProcessorError = {
       error:
-        "Unable to capture payment as razorpay doesn't support cancellation",
+        "Unable to capture payment doesn't support capturePayment",
       code: "Unsupported",
     };
     return error;
@@ -308,7 +266,6 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
         ? undefined
         : {
             customer_metadata: {
-              comgateClientId: "Asfsf",
             },
           },
     };
@@ -321,20 +278,8 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
   ): Promise<
     PaymentProcessorSessionResponse["session_data"] | PaymentProcessorError
   > {
-    const error: PaymentProcessorError = {
-      error: "Unable to cancel as razorpay doesn't support cancellation",
-      code: "Unsupported",
-    };
-    return error;
+    return data;
   }
-  /*
-  /**
-   * Constructs Razorpay Webhook event
-   * @param {object} data - the data of the webhook request: req.body
-   * @param {object} signature - the Razorpay signature on the event, that
-   *    ensures integrity of the webhook event
-   * @return {object} Razorpay Webhook event
-   */
 
   protected buildError(
     message: string,
