@@ -5,6 +5,7 @@ import {CreateCountry, CreateCurr, CreateRequest} from "comgate-node/dist/types/
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
         const cartId = req.body.cart_id;
+        const redirectUrl = req.body.redirect;
 
         const plugin = req.scope.resolve<ComgateProviderService>("comgateProviderService")
 
@@ -29,6 +30,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             prepareOnly: true,
             preauth: false,
             verification: false,
+            url_pending: redirectUrl,
+            url_paid: redirectUrl,
+            url_cancelled: redirectUrl
         };
 
         try {
