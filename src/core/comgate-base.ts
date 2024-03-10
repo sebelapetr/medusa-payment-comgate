@@ -215,12 +215,7 @@ abstract class ComgateBase extends AbstractPaymentProcessor {
       console.log("ComgateMedusa: " + "capturePayment", "start")
     }
 
-    const error: PaymentProcessorError = {
-      error:
-        "Unable to capture payment doesn't support capturePayment",
-      code: "Unsupported",
-    };
-    return error;
+    return paymentSessionData;
   }
 
   async deletePayment(

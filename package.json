@@ -1,6 +1,6 @@
 {
   "name": "medusa-payment-comgate",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "description": "Comgate payment gateway provider for MedusaJS",
   "main": "dist/index.js",
   "repository": {
